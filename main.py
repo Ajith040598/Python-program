@@ -1,33 +1,18 @@
-import random
-from string import ascii_uppercase
-import mysql.connector
+import requests
 
-mydb = mysql.connector.connect(
-
-host="localhost",
-user="root",
-password="Ajithkumar@1",
-database="retail"
-
-)
+data = requests.get("https://api.covidtracking.com/v1/us/daily.json")
+data_1 = data.json()
+print(data_1)
 
 
-cursor = mydb.cursor()
+import pandas as pd
+data_2 = pd.DataFrame(data_1)
 
-
-for i in range(1,101):
-    for j in range(1,11):
-        cursor.execute("INSERT INTO order1 (order_data, order_id, product_id, customer_id, quentity, amount) VALUES (%s, %s, %s, %s, %s, %s)", (i, str(i).zfill(6), random.randrange(100,200)))
-
-
-
-mydb.commit()
-
-
-
-for i in range(len(ascii_uppercase)):
-    cursor.execute("INSERT INTO inventory (productID, productName) VALUES (%s, %s)", (str(i+1).zfill(3), ascii_uppercase[i]))
-
-
-
-mydb.commit()
+from sqlalchemy import create_engine
+try:
+    create = create_engine("mysql+pymysql://root:Ajith98$@localhost/webscrap1")
+    data_2.to_csv("covid_data.csv")
+    df = pd.read_csv("covid_data.csv",index_col=False)
+    df.to_sql("mysql", create, if_exists="replace", index=False)
+except:
+    print("something went wrong")
